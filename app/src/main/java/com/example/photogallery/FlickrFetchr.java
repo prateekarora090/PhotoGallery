@@ -19,6 +19,15 @@ public class FlickrFetchr {
 
     private static final String TAG = "FlickFetchr";
     private static final String API_KEY = "dbfd020c40bcb5700382d58b89c61f9b";
+    private static final String FETCH_RECENTS_METHOD = "flickr.photos.getRecent"; //<-- added
+    private static final String SEARCH_METHOD = "flickr.photos.search"; //<-- added
+    private static final Uri ENDPOINT = Uri.parse("https://www.flickr.com/services/rest")//<-- added
+            .buildUpon()
+            .appendQueryParameter("api_key", API_KEY)
+            .appendQueryParameter("format", "json")
+            .appendQueryParameter("nojsoncallback", "1")
+            .appendQueryParameter("extras", "url_s")
+            .build();
 
     public byte[] getUrlBytes(String urlSpec) throws IOException {
         URL url = new URL(urlSpec);
@@ -47,17 +56,19 @@ public class FlickrFetchr {
         return new String(getUrlBytes(urlSpec));
     }
 
-    public List<GalleryItem> fetchItems() {
+    public List<GalleryItem> fetchRecentPhotos() {
+        String url = buildUrl(FETCH_RECENTS_METHOD, null);
+        return downloadGalleryItems(url);
+    }
+
+    public List<GalleryItem> searchPhotos(String query) {
+        String url = buildUrl(SEARCH_METHOD, query);
+        return downloadGalleryItems(url);
+    }
+
+    private List<GalleryItem> downloadGalleryItems(String url) {
         List<GalleryItem> items = new ArrayList<>();
         try {
-            String url = Uri.parse("https://www.flickr.com/services/rest/")
-                    .buildUpon()
-                    .appendQueryParameter("method", "flickr.photos.getRecent")
-                    .appendQueryParameter("api_key", API_KEY)
-                    .appendQueryParameter("format", "json")
-                    .appendQueryParameter("nojsoncallback", "1")
-                    .appendQueryParameter("extras", "url_s")
-                    .build().toString();
             String jsonString = getUrlString(url);
             Log.i(TAG, "Received JSON: " + jsonString);
             JSONObject jsonBody = new JSONObject(jsonString);
@@ -68,6 +79,17 @@ public class FlickrFetchr {
             Log.e(TAG, "Failed to parse JSON", je);
         }
         return items;
+    }
+
+    private String buildUrl(String method, String query) {
+        Uri.Builder uriBuilder = ENDPOINT.buildUpon()
+                .appendQueryParameter("method", method);
+
+        if (method.equals(SEARCH_METHOD)) {
+            uriBuilder.appendQueryParameter("text", query);
+        }
+
+        return uriBuilder.build().toString();
     }
 
     private void parseItems(List<GalleryItem> items, JSONObject jsonBody) throws IOException, JSONException{
