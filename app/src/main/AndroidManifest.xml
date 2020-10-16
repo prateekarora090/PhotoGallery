@@ -3,12 +3,12 @@
     package="com.example.photogallery">
 
     <permission android:name="com.example.photogallery.PRIVATE"
-        android:protectionLevel="signature" /> <!-- Added -->
+        android:protectionLevel="signature" />
 
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
-    <uses-permission android:name="com.example.photogallery.PRIVATE" /> <!-- Added -->
+    <uses-permission android:name="com.example.photogallery.PRIVATE" />
     <application
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
@@ -23,6 +23,8 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+        <activity android:name=".PhotoPageActivity"
+            android:configChanges="keyboardHidden|orientation|screenSize" />
         <service android:name=".PollService" />
 
         <receiver android:name=".StartupReceiver">
